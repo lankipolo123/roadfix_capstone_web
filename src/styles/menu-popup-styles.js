@@ -1,28 +1,28 @@
 import { LitElement, html, css } from 'lit';
 
 export class MenuPopup extends LitElement {
-    static properties = {
-        isOpen: { type: Boolean },
-        items: { type: Array },
-        triggerIcon: { type: String },
-        position: { type: String }, // right/left/center
-        size: { type: String }, // small/medium/large
-    };
+  static properties = {
+    isOpen: { type: Boolean },
+    items: { type: Array },
+    triggerIcon: { type: String },
+    position: { type: String }, // right/left/center
+    size: { type: String }, // small/medium/large
+  };
 
-    constructor() {
-        super();
-        this.isOpen = false;
-        this.items = [];
-        this.triggerIcon = '⋮';
-        this.position = 'right';
-        this.size = 'medium';
+  constructor() {
+    super();
+    this.isOpen = false;
+    this.items = [];
+    this.triggerIcon = '⋮';
+    this.position = 'right';
+    this.size = 'medium';
 
-        // bind handlers
-        this._onDocumentClick = this._onDocumentClick.bind(this);
-        this._onKeyDown = this._onKeyDown.bind(this);
-    }
+    // bind handlers
+    this._onDocumentClick = this._onDocumentClick.bind(this);
+    this._onKeyDown = this._onKeyDown.bind(this);
+  }
 
-    static styles = css`
+  static styles = css`
     :host {
       position: relative;
       display: inline-block;
@@ -107,57 +107,57 @@ export class MenuPopup extends LitElement {
     }
   `;
 
-    connectedCallback() {
-        super.connectedCallback();
-        document.addEventListener('click', this._onDocumentClick);
-        document.addEventListener('keydown', this._onKeyDown);
-    }
+  connectedCallback() {
+    super.connectedCallback();
+    document.addEventListener('click', this._onDocumentClick);
+    document.addEventListener('keydown', this._onKeyDown);
+  }
 
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        document.removeEventListener('click', this._onDocumentClick);
-        document.removeEventListener('keydown', this._onKeyDown);
-    }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener('click', this._onDocumentClick);
+    document.removeEventListener('keydown', this._onKeyDown);
+  }
 
-    _onDocumentClick(e) {
-        if (!e.composedPath().includes(this)) {
-            this.isOpen = false;
-        }
+  _onDocumentClick(e) {
+    if (!e.composedPath().includes(this)) {
+      this.isOpen = false;
     }
+  }
 
-    _onKeyDown(e) {
-        if (e.key === 'Escape') {
-            this.isOpen = false;
-        }
+  _onKeyDown(e) {
+    if (e.key === 'Escape') {
+      this.isOpen = false;
     }
+  }
 
-    toggleMenu(e) {
-        e.stopPropagation();
-        this.isOpen = !this.isOpen;
+  toggleMenu(e) {
+    e.stopPropagation();
+    this.isOpen = !this.isOpen;
+  }
+
+  closeMenu() {
+    this.isOpen = false;
+  }
+
+  handleItemClick(item, e) {
+    e.stopPropagation();
+    if (item.disabled) return;
+    this.closeMenu();
+    this.dispatchEvent(
+      new CustomEvent('menu-item-click', {
+        detail: { action: item.action, item, value: item.value },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  renderMenuItem(item) {
+    if (item.type === 'divider') {
+      return html`<div class="menu-divider"></div>`;
     }
-
-    closeMenu() {
-        this.isOpen = false;
-    }
-
-    handleItemClick(item, e) {
-        e.stopPropagation();
-        if (item.disabled) return;
-        this.closeMenu();
-        this.dispatchEvent(
-            new CustomEvent('menu-item-click', {
-                detail: { action: item.action, item, value: item.value },
-                bubbles: true,
-                composed: true,
-            })
-        );
-    }
-
-    renderMenuItem(item) {
-        if (item.type === 'divider') {
-            return html`<div class="menu-divider"></div>`;
-        }
-        return html`
+    return html`
       <button
         class="menu-item ${item.variant || ''}"
         ?disabled=${item.disabled}
@@ -166,14 +166,14 @@ export class MenuPopup extends LitElement {
         ${item.icon ? html`<span class="menu-icon">${item.icon}</span>` : ''}
         <span>${item.label}</span>
         ${item.shortcut
-                ? html`<span class="menu-shortcut">${item.shortcut}</span>`
-                : ''}
+        ? html`<span class="menu-shortcut">${item.shortcut}</span>`
+        : ''}
       </button>
     `;
-    }
+  }
 
-    render() {
-        return html`
+  render() {
+    return html`
       <button
         class="menu-trigger ${this.size}"
         @click=${(e) => this.toggleMenu(e)}
@@ -189,7 +189,7 @@ export class MenuPopup extends LitElement {
         ${this.items.map((item) => this.renderMenuItem(item))}
       </div>
     `;
-    }
+  }
 }
 
 customElements.define('menu-popup', MenuPopup);
